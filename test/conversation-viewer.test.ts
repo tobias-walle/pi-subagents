@@ -1,5 +1,9 @@
+import type { TextContent } from "@earendil-works/pi-ai";
+import * as PiTui from "@earendil-works/pi-tui";
+import { visibleWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AgentRecord } from "../src/types.js";
+import { ConversationViewer, RESULT_MAX_CHARS } from "../src/ui/conversation-viewer.js";
 
 // ── Mock wrapTextWithAnsi ──────────────────────────────────────────────
 // We need to control what wrapTextWithAnsi returns to simulate the
@@ -16,7 +20,7 @@ let markdownRenderCalls = 0;
 let markdownThrows = false;
 
 vi.mock("@earendil-works/pi-tui", async (importOriginal) => {
-  const original = await importOriginal<typeof import("@earendil-works/pi-tui")>();
+  const original = await importOriginal<typeof PiTui>();
   return {
     ...original,
     Markdown: class extends original.Markdown {
@@ -40,11 +44,6 @@ vi.mock("@earendil-works/pi-tui", async (importOriginal) => {
     },
   };
 });
-
-// Must import AFTER vi.mock declaration (vitest hoists vi.mock but the
-// dynamic import of the test subject must happen after)
-const { visibleWidth } = await import("@earendil-works/pi-tui");
-const { ConversationViewer, RESULT_MAX_CHARS } = await import("../src/ui/conversation-viewer.js");
 
 // ── Helpers ────────────────────────────────────────────────────────────
 
@@ -332,7 +331,7 @@ describe("ConversationViewer", () => {
           role: "assistant",
           content: [
             { type: "text", text: "Let me check that." },
-            { type: "toolCall", toolUseId: "t1", name: "very_long_tool_name_" + "x".repeat(200), input: {} },
+            { type: "toolCall", id: "t1", name: "very_long_tool_name_" + "x".repeat(200), arguments: {} },
           ],
         },
       ];
@@ -382,11 +381,13 @@ describe("ConversationViewer", () => {
       /** Tall enough that the assertion reads the whole transcript, not the scrolled window. */
       rows = 200,
     ) {
-      return new ConversationViewer(
+      const viewer = new ConversationViewer(
         mockTui(rows, 80), mockSession(messages), mockRecord({ status: "completed" }), undefined,
         ansiTheme(), vi.fn(), undefined, undefined, undefined, false,
         mode ? () => mode : undefined, onMode,
       );
+      viewer.handleInput("c");
+      return viewer;
     }
 
     const assistant = (text: string) => [{ role: "assistant", content: [{ type: "text", text }] }];
@@ -495,6 +496,9 @@ describe("ConversationViewer", () => {
       expect(footer).toContain("Enter steer");
       expect(footer).toContain("x stop");
       expect(footer).toContain("m md");
+      expect(footer).toContain("c compact");
+      expect(footer).toContain("j/k");
+      expect(footer).toContain("u/d ½pg");
       expect(footer).toContain("Esc close");
     });
 
@@ -665,6 +669,7 @@ describe("ConversationViewer", () => {
         const viewer = new ConversationViewer(
           mockTui(30, w), mockSession(assistant(text)), mockRecord(), undefined, ansiTheme(), vi.fn(),
         );
+        viewer.handleInput("c");
         const content = (viewer as any).buildContentLines(w) as string[];
 
         assertAllLinesFit(content, w);
@@ -683,11 +688,11 @@ describe("ConversationViewer", () => {
 
     /** Call the private buildContentLines method directly. */
     function callBuildContentLines(viewer: InstanceType<typeof ConversationViewer>, width: number): string[] {
+      viewer.handleInput("c");
       return (viewer as any).buildContentLines(width);
     }
 
-    it("mock is intercepting wrapTextWithAnsi", async () => {
-      const { wrapTextWithAnsi } = await import("@earendil-works/pi-tui");
+    it("mock is intercepting wrapTextWithAnsi", () => {
       wrapOverride = () => ["MOCK_SENTINEL"];
       expect(wrapTextWithAnsi("anything", 10)).toEqual(["MOCK_SENTINEL"]);
       wrapOverride = null;
@@ -757,6 +762,130 @@ describe("ConversationViewer", () => {
         mockTui(30, w), mockSession(messages), mockRecord(), undefined, ansiTheme(), vi.fn(),
       );
       assertAllLinesFit(callBuildContentLines(viewer, w), w);
+    });
+  });
+
+  describe("compact transcript", () => {
+    const strip = (text: string) => text.replace(/\x1b\[[0-9;]*m/g, "");
+    const first: TextContent = { type: "text", text: "# First" };
+    const second: TextContent = { type: "text", text: "**Second**" };
+
+    function compactViewer(blocks: TextContent[] = [first, second]) {
+      return new ConversationViewer(
+        mockTui(200, 80), mockSession([
+          { role: "user", content: "# Raw user" },
+          { role: "assistant", content: [blocks[0], { type: "toolCall", id: "t", name: "read", arguments: { path: "file.ts" } }, ...blocks.slice(1)] },
+          { role: "toolResult", isError: false, content: [{ type: "text", text: "RESULT_BODY" }] },
+        ]), mockRecord({ status: "completed" }), undefined, ansiTheme(), vi.fn(),
+      );
+    }
+
+    it("defaults to compact Markdown, preserves order and hides successful results", () => {
+      const viewer = compactViewer();
+      const out = strip(viewer.render(80).join("\n"));
+      expect(out).toContain("c compact");
+      expect(out).toContain("› # Raw user");
+      expect(out).not.toContain("# First");
+      expect(out).not.toContain("**Second**");
+      expect(out.indexOf("First")).toBeLessThan(out.indexOf("◇ read"));
+      expect(out.indexOf("◇ read")).toBeLessThan(out.indexOf("Second"));
+      expect(out).not.toContain("RESULT_BODY");
+      expect(out).not.toContain("[Assistant]");
+    });
+
+    it("toggles full output without changing Markdown and returns to compact", () => {
+      const viewer = compactViewer();
+      viewer.handleInput("c");
+      const full = strip(viewer.render(80).join("\n"));
+      expect(full).toContain("c full");
+      expect(full).toContain("[Assistant]");
+      expect(full).toContain("RESULT_BODY");
+      expect(full).not.toContain("# First");
+      viewer.handleInput("c");
+      expect(strip(viewer.render(80).join("\n"))).not.toContain("RESULT_BODY");
+    });
+
+    it("keeps m as formatting only in compact mode", () => {
+      const viewer = compactViewer();
+      viewer.handleInput("m");
+      viewer.handleInput("m");
+      const out = strip(viewer.render(80).join("\n"));
+      expect(out).toContain("# First");
+      expect(out).toContain("**Second**");
+      expect(out).not.toContain("RESULT_BODY");
+      viewer.handleInput("c");
+      expect(strip(viewer.render(80).join("\n"))).toContain("# First");
+    });
+
+    it("c disarms stop and requests rendering", () => {
+      const tui = mockTui();
+      const onStop = vi.fn();
+      const viewer = new ConversationViewer(tui, mockSession(), mockRecord(), undefined, ansiTheme(), vi.fn(), onStop);
+      viewer.handleInput("x");
+      tui.requestRender.mockClear();
+      viewer.handleInput("c");
+      expect(tui.requestRender).toHaveBeenCalledOnce();
+      viewer.handleInput("x");
+      expect(onStop).not.toHaveBeenCalled();
+    });
+
+    it("c types in the composer instead of toggling layout", () => {
+      const onSteer = vi.fn();
+      const viewer = new ConversationViewer(
+        mockTui(), mockSession(), mockRecord(), undefined, ansiTheme(), vi.fn(), undefined, undefined, onSteer,
+      );
+      viewer.handleInput("\r");
+      viewer.handleInput("c");
+      viewer.handleInput("\r");
+      expect(onSteer).toHaveBeenCalledWith("c");
+      expect(strip(viewer.render(80).join("\n"))).toContain("c compact");
+    });
+
+    it("caches stable blocks separately and updates streaming text", () => {
+      const growing: TextContent = { type: "text", text: "# Growing" };
+      const viewer = compactViewer([growing, second]);
+      viewer.render(80);
+      viewer.render(80);
+      expect(markdownConstructions).toBe(2);
+      growing.text += " updated";
+      expect(strip(viewer.render(80).join("\n"))).toContain("Growing updated");
+      expect(markdownConstructions).toBe(2);
+    });
+
+    it("remembers failed block prefixes until replaced", () => {
+      const block: TextContent = { type: "text", text: "# unsafe" };
+      const viewer = compactViewer([block]);
+      markdownThrows = true;
+      viewer.render(80);
+      block.text += " delta";
+      viewer.render(80);
+      expect(markdownRenderCalls).toBe(1);
+      markdownThrows = false;
+      block.text = "# safe";
+      expect(strip(viewer.render(80).join("\n"))).not.toContain("# safe");
+      expect(markdownRenderCalls).toBe(2);
+    });
+
+    it("clamps prefixed Markdown at narrow widths in either layout", () => {
+      for (const width of [6, 8, 10, 20, 40]) {
+        const viewer = compactViewer([{ type: "text", text: "# 日本語 heading\n\n**bold** ".repeat(10) }]);
+        assertAllLinesFit(viewer.render(width), width);
+        viewer.handleInput("c");
+        assertAllLinesFit(viewer.render(width), width);
+      }
+    });
+
+    it("uses the layout-specific streaming glyph", () => {
+      const activity = {
+        activeTools: new Map<string, string>(), toolUses: 0, responseText: "STREAMING_SENTINEL",
+      };
+      const viewer = new ConversationViewer(
+        mockTui(40, 80), mockSession([{ role: "user", content: "hi" }]), mockRecord(),
+        activity as unknown as NonNullable<ConstructorParameters<typeof ConversationViewer>[3]>, ansiTheme(), vi.fn(),
+      );
+      expect(strip(viewer.render(80).join("\n"))).toContain("› STREAMING_SENTINEL");
+      viewer.handleInput("c");
+      expect(strip(viewer.render(80).join("\n"))).toContain("▍ STREAMING_SENTINEL");
     });
   });
 

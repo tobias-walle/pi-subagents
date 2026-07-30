@@ -5,6 +5,7 @@
  * Subscribes to session events for real-time streaming updates.
  */
 
+import type { TextContent } from "@earendil-works/pi-ai";
 import { type AgentSession, getMarkdownTheme } from "@earendil-works/pi-coding-agent";
 import { type Component, Input, Markdown, type MarkdownOptions, type MarkdownTheme, matchesKey, type TUI, truncateToWidth, visibleWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
 import { renderAgentName } from "../agent-color.js";
@@ -13,6 +14,7 @@ import type { AgentRecord, ViewerMarkdownMode } from "../types.js";
 import { getLifetimeCost, getLifetimeTotal, getSessionContextPercent } from "../usage.js";
 import type { Theme } from "./agent-widget.js";
 import { type AgentActivity, buildInvocationTags, describeActivity, fgPreservingNestedStyles, formatCost, formatDuration, formatSessionTokens, getPromptModeLabel } from "./agent-widget.js";
+import { renderCompactTranscript } from "./compact-transcript.js";
 import { createViewerKeys, type ViewerKeybindings, type ViewerKeys } from "./viewer-keys.js";
 
 /** Base lines consumed by chrome: top border + header + header sep + footer sep + footer + bottom border. */
@@ -140,6 +142,8 @@ function truncationNote(elided: number): string {
 export class ConversationViewer implements Component {
   private scrollOffset = 0;
   private autoScroll = true;
+  /** Viewer-local layout choice, independent of Markdown formatting. */
+  private compact = true;
   private unsubscribe: (() => void) | undefined;
   private lastInnerW = 0;
   private closed = false;
@@ -153,7 +157,8 @@ export class ConversationViewer implements Component {
   /** Set by the `m` key. Wins over the setting so `m` works without a persist hook. */
   private markdownModeOverride: ViewerMarkdownMode | undefined;
   /**
-   * One `Markdown` per message, so its own text/width cache does the work. A
+   * One `Markdown` per message (full) or text block (compact), so its own
+   * text/width cache does the work. A
    * fresh instance per render would re-parse the whole transcript on every
    * keystroke — the component caches, but only across calls to the same object.
    * Weak so a compacted-away message doesn't pin its render.
@@ -250,6 +255,11 @@ export class ConversationViewer implements Component {
       return;
     }
     if (this.stopArmed) this.stopArmed = false;
+    if (matchesKey(data, "c")) {
+      this.compact = !this.compact;
+      this.tui.requestRender();
+      return;
+    }
 
     const totalLines = this.buildContentLines(this.lastInnerW).length;
     const viewportHeight = this.viewportHeight();
@@ -372,7 +382,8 @@ export class ConversationViewer implements Component {
       // at 80 columns with steer + stop present, and this group has no
       // degradation step below "drop the line-count readout".
       actions.push(th.fg("dim", `m ${MARKDOWN_MODE_LABELS[this.markdownMode()]}`));
-      const footerRight = th.fg("dim", "j/k scroll · d/u half-page · PgUp/PgDn · Esc close");
+      actions.push(th.fg("dim", `c ${this.compact ? "compact" : "full"}`));
+      const footerRight = th.fg("dim", "j/k · u/d ½pg · PgUp/Dn · Esc close");
 
       // Prepend the line-count/scroll-% readout only when there's spare width —
       // it's the first thing dropped so it never crowds out the hints.
@@ -410,7 +421,7 @@ export class ConversationViewer implements Component {
   }
 
   /** Render `text` as Markdown, reusing this message's component instance. */
-  private markdownLines(msg: AgentSession["messages"][number], text: string, width: number, dim: boolean): string[] {
+  private markdownLines(msg: AgentSession["messages"][number] | TextContent, text: string, width: number, dim: boolean): string[] {
     let entry = this.markdownCache.get(msg);
     if (!entry) {
       entry = {
@@ -517,13 +528,29 @@ export class ConversationViewer implements Component {
 
     const th = this.theme;
     const messages = this.session.messages;
-    const lines: string[] = [];
+    if (messages.length === 0) return [th.fg("dim", "(waiting for first message...)")];
 
-    if (messages.length === 0) {
-      lines.push(th.fg("dim", "(waiting for first message...)"));
-      return lines;
+    const lines = this.compact
+      ? renderCompactTranscript({
+        messages, width, theme: th,
+        renderAssistant: (text, block) => this.markdownMode() === "off"
+          ? this.rawLines(text, Math.max(1, width - 2), false)
+          : this.markdownLines(block, text, Math.max(1, width - 2), false),
+      })
+      : this.buildFullContentLines(width);
+
+    if (this.record.status === "running" && this.activity) {
+      const act = describeActivity(this.activity.activeTools, this.activity.responseText);
+      lines.push("");
+      lines.push(truncateToWidth(th.fg("accent", this.compact ? "› " : "▍ ") + th.fg("dim", act), width));
     }
+    return lines.map(l => truncateToWidth(l, width));
+  }
 
+  private buildFullContentLines(width: number): string[] {
+    const th = this.theme;
+    const messages = this.session.messages;
+    const lines: string[] = [];
     const mode = this.markdownMode();
     let needsSeparator = false;
     for (const msg of messages) {
@@ -581,13 +608,6 @@ export class ConversationViewer implements Component {
         continue;
       }
       needsSeparator = true;
-    }
-
-    // Streaming indicator for running agents
-    if (this.record.status === "running" && this.activity) {
-      const act = describeActivity(this.activity.activeTools, this.activity.responseText);
-      lines.push("");
-      lines.push(truncateToWidth(th.fg("accent", "▍ ") + th.fg("dim", act), width));
     }
 
     return lines.map(l => truncateToWidth(l, width));

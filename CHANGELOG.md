@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Conversation inspection supports Vim-style half-page scrolling.** The live subagent conversation viewer now accepts `d`/`u` for half-page movement alongside its existing `j`/`k`, arrow, Page Up/Page Down, Shift+arrow, and custom `tui.select.*` bindings. The footer now advertises the compact navigation keys.
 
+### Changed
+- **The agent conversation view now defaults to a compact, color-coded activity transcript.** Assistant updates use a small `›` marker, tool calls show as single `◇ tool  argument` rows (`◈ agent` for subagent launches), and invocation details such as model and background status stay on that row. Successful tool-result bodies are collapsed instead of filling the viewport. Failures retain one concise error line. This replaces the repeated `[User]`, `[Assistant]`, `[Tool]`, and `[Result]` sections while preserving chronological call order. Press `c` to toggle compact mode and restore full output. The `m` Markdown toggle continues to work in both compact and full modes.
+
 ### Fixed
 - **The workflow stand-down now recognises a lowercase `workflow` tool** ([#283](https://github.com/tintinweb/pi-subagents/issues/283) — thanks [@zampierilucas](https://github.com/zampierilucas)). The match is exact on purpose, and the set held `Workflow` and `SubagentWorkflow` only, so `@quintinshaw/pi-dynamic-workflows` — which registers lowercase `workflow` — never tripped it: with `workflowsEnabled` unset, both orchestrators reached the model and nothing warned. Adding the third name is the whole fix; exactness is kept, so a `list_workflows` still cannot take the feature down.
 
