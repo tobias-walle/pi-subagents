@@ -261,6 +261,12 @@ export class ConversationViewer implements Component {
     } else if (this.keys.scrollDown(data)) {
       this.scrollOffset = Math.min(maxScroll, this.scrollOffset + 1);
       this.autoScroll = this.scrollOffset >= maxScroll;
+    } else if (this.keys.halfPageUp(data)) {
+      this.scrollOffset = Math.max(0, this.scrollOffset - Math.max(1, Math.floor(viewportHeight / 2)));
+      this.autoScroll = false;
+    } else if (this.keys.halfPageDown(data)) {
+      this.scrollOffset = Math.min(maxScroll, this.scrollOffset + Math.max(1, Math.floor(viewportHeight / 2)));
+      this.autoScroll = this.scrollOffset >= maxScroll;
     } else if (this.keys.pageUp(data)) {
       this.scrollOffset = Math.max(0, this.scrollOffset - viewportHeight);
       this.autoScroll = false;
@@ -366,7 +372,7 @@ export class ConversationViewer implements Component {
       // at 80 columns with steer + stop present, and this group has no
       // degradation step below "drop the line-count readout".
       actions.push(th.fg("dim", `m ${MARKDOWN_MODE_LABELS[this.markdownMode()]}`));
-      const footerRight = th.fg("dim", "↑↓ scroll · PgUp/PgDn or Shift+↑↓ · Esc close");
+      const footerRight = th.fg("dim", "j/k scroll · d/u half-page · PgUp/PgDn · Esc close");
 
       // Prepend the line-count/scroll-% readout only when there's spare width —
       // it's the first thing dropped so it never crowds out the hints.

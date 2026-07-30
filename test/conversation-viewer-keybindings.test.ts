@@ -74,10 +74,12 @@ describe("viewer-keys", () => {
     expect(keys.pageDown(PAGE_DOWN)).toBe(true);
   });
 
-  it("keeps the k/j and shift+arrow aliases with and without a manager", () => {
+  it("keeps the k/j, u/d, and shift+arrow aliases with and without a manager", () => {
     for (const keys of [createViewerKeys(), createViewerKeys(createEmacsKeybindings())]) {
       expect(keys.scrollUp("k")).toBe(true);
       expect(keys.scrollDown("j")).toBe(true);
+      expect(keys.halfPageUp("u")).toBe(true);
+      expect(keys.halfPageDown("d")).toBe(true);
       expect(keys.pageUp(SHIFT_UP)).toBe(true);
       expect(keys.pageDown(SHIFT_DOWN)).toBe(true);
     }
@@ -124,6 +126,16 @@ describe("ConversationViewer custom keybindings", () => {
     expect(scrollOffset(viewer)).toBe(bottom - 2);
     viewer.handleInput(DOWN);
     viewer.handleInput("j");
+    expect(scrollOffset(viewer)).toBe(bottom);
+  });
+
+  it("scrolls half a viewport with u/d", () => {
+    const viewer = createViewer();
+    const bottom = scrollOffset(viewer);
+
+    viewer.handleInput("u");
+    expect(scrollOffset(viewer)).toBe(bottom - 4);
+    viewer.handleInput("d");
     expect(scrollOffset(viewer)).toBe(bottom);
   });
 
