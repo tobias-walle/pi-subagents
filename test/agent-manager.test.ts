@@ -1450,6 +1450,26 @@ describe("AgentManager — parent abort signal forwarding (#44)", () => {
     expect(record.status).toBe("stopped");
     expect(record.completedAt).toBeGreaterThan(0);
   });
+
+  it("immediately aborts the child when the parent signal is already aborted", () => {
+    let childSignal: AbortSignal | undefined;
+    vi.mocked(runAgent).mockImplementation((_ctx, _type, _prompt, options) => {
+      childSignal = options.signal;
+      return new Promise(() => {});
+    });
+    manager = new AgentManager();
+
+    const parent = new AbortController();
+    parent.abort();
+    const id = manager.spawn(mockPi, mockCtx, "X", "p", {
+      description: "x",
+      isBackground: false,
+      signal: parent.signal,
+    });
+
+    expect(childSignal?.aborted).toBe(true);
+    expect(manager.getRecord(id)?.status).toBe("stopped");
+  });
 });
 
 describe("AgentManager — listAgents() ordering", () => {

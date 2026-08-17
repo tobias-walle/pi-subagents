@@ -1107,6 +1107,12 @@ export default function (pi: ExtensionAPI) {
       delete (globalThis as any)[MANAGER_KEY];
     }
     scheduler.stop();
+    if (batchFinalizeTimer) {
+      clearTimeout(batchFinalizeTimer);
+      batchFinalizeTimer = undefined;
+    }
+    currentBatchAgents = [];
+    groupJoin.dispose();
     // Before abortAll, and not folded into it: a workflow owns a worker thread
     // as well as its children, and only its own signal terminates that.
     for (const task of workflowTasks.values()) task.abortController.abort();
@@ -1114,6 +1120,7 @@ export default function (pi: ExtensionAPI) {
     manager.abortAll();
     for (const timer of pendingNudges.values()) clearTimeout(timer);
     pendingNudges.clear();
+    widget.dispose();
     fleet.dispose();
     // Awaited: it emits `session_shutdown` into every retained child session so
     // extensions bound there can release what they armed in `session_start` (#242).

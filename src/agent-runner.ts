@@ -613,6 +613,8 @@ export async function runAgent(
   prompt: string,
   options: RunOptions,
 ): Promise<RunResult> {
+  options.signal?.throwIfAborted();
+
   const config = getConfig(type);
   const agentConfig = getAgentConfig(type);
 
@@ -1110,6 +1112,9 @@ export async function runAgent(
   const startLen = session.messages.length;
   let structuredRetried = false;
   try {
+    // Cancellation may have happened during asynchronous session setup. Do not
+    // start a prompt after its abort event has already passed.
+    options.signal?.throwIfAborted();
     await session.prompt(effectivePrompt);
 
     // One more prompt when a schema was asked for and nothing usable came back
@@ -1189,6 +1194,7 @@ export async function resumeAgent(
     : () => {};
 
   try {
+    options.signal?.throwIfAborted();
     await session.prompt(prompt);
   } finally {
     collector.unsubscribe();

@@ -93,6 +93,7 @@ describe("FleetView wiring (real extension lifecycle)", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     process.chdir(prevCwd);
     if (prevAgentDir == null) delete process.env.PI_CODING_AGENT_DIR;
     else process.env.PI_CODING_AGENT_DIR = prevAgentDir;
@@ -130,7 +131,7 @@ describe("FleetView wiring (real extension lifecycle)", () => {
       { prompt: "go", description: "live one", subagent_type: "general-purpose", run_in_background: true },
       undefined,
       undefined,
-      ctxWith(uiCtx()),
+      ctxWith(ui),
     );
     expect(textOf(spawn)).toMatch(/Agent ID:/);
     await flush(); // completion → fleet.onAgentFinished → update → widget registers
@@ -139,6 +140,59 @@ describe("FleetView wiring (real extension lifecycle)", () => {
     expect(fleetRegs.length, "fleet widget should register with a render factory").toBeGreaterThan(0);
 
     await lifecycle.get("session_shutdown")?.({}, ctxWith(uiCtx()));
-    expect(ui.setWidget).toHaveBeenCalledWith("fleet", undefined); // dispose cleared it
+    expect(ui.setWidget).toHaveBeenCalledWith("agents", undefined);
+    expect(ui.setWidget).toHaveBeenCalledWith("fleet", undefined);
+  });
+
+  it("clears a pending smart-batch timer on shutdown", async () => {
+    vi.useFakeTimers();
+    writeFileSync(join(tmpDir, ".pi", "subagents.json"), JSON.stringify({ schedulingEnabled: false, defaultJoinMode: "smart" }));
+    vi.mocked(runAgent).mockImplementation(() => new Promise(() => {}));
+
+    const { pi, tools, lifecycle } = makePi();
+    subagentsExtension(pi);
+    const ui = uiCtx();
+    await tools.get("Agent").execute(
+      "tc",
+      { prompt: "go", description: "pending batch", subagent_type: "general-purpose", run_in_background: true },
+      undefined,
+      undefined,
+      ctxWith(ui),
+    );
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+
+    await lifecycle.get("session_shutdown")?.({}, ctxWith(ui));
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("clears a pending group-join timeout on shutdown", async () => {
+    vi.useFakeTimers();
+    writeFileSync(join(tmpDir, ".pi", "subagents.json"), JSON.stringify({ schedulingEnabled: false, defaultJoinMode: "smart" }));
+    vi.mocked(runAgent)
+      .mockResolvedValueOnce({
+        responseText: "done",
+        session: { dispose: vi.fn() } as any,
+        aborted: false,
+        steered: false,
+      })
+      .mockImplementation(() => new Promise(() => {}));
+
+    const { pi, tools, lifecycle } = makePi();
+    subagentsExtension(pi);
+    const ui = uiCtx();
+    for (const description of ["fast agent", "stuck agent"]) {
+      await tools.get("Agent").execute(
+        `tc-${description}`,
+        { prompt: "go", description, subagent_type: "general-purpose", run_in_background: true },
+        undefined,
+        undefined,
+        ctxWith(ui),
+      );
+    }
+    await vi.advanceTimersByTimeAsync(100);
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+
+    await lifecycle.get("session_shutdown")?.({}, ctxWith(ui));
+    expect(vi.getTimerCount()).toBe(0);
   });
 });
