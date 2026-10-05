@@ -24,9 +24,10 @@ test/
 tests/
 *.test.ts
 *.spec.ts
-vitest.config.ts
+vitest.config.mts
 
 .pi
+.agents
 .claude
 .vscode
 .github/
