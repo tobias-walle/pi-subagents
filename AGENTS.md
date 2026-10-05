@@ -58,7 +58,6 @@ Read the file that covers a surface before changing its behavior; update it in t
 
 ## Git
 
-- **Never commit.** The user commits manually. At most, suggest a concise commit message as text.
 - **Never push**, tag, or create branches unless the user explicitly asks.
 - Never run history- or worktree-destroying commands: `git reset --hard`, `git checkout .`, `git clean -fd`, `git stash`, `git add -A`, `git add .`, `git commit --no-verify`, or any force push.
 - Leave the working tree as the user left it — don't stage, stash, or revert files you didn't change.
