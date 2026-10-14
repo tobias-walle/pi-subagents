@@ -5,8 +5,8 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { getAgentDir, parseFrontmatter } from "@earendil-works/pi-coding-agent";
-import { BUILTIN_TOOL_NAMES } from "./agent-types.js";
-import type { AgentConfig, IsolationMode, MemoryScope, ThinkingLevel } from "./types.js";
+import { BUILTIN_TOOL_NAMES } from "./agent-types.ts";
+import type { AgentConfig, IsolationMode, MemoryScope, ThinkingLevel } from "./types.ts";
 
 /**
  * The one thing a declared `name:` may not contain, matching Claude Code

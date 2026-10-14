@@ -69,9 +69,9 @@ import {
   SessionManager,
   type ToolDefinition,
 } from "@earendil-works/pi-coding-agent";
-import { runInChildSessionContext } from "./child-context.js";
-import { agentMentionReminder } from "./mention.js";
-import type { SubagentType, ThinkingLevel } from "./types.js";
+import { runInChildSessionContext } from "./child-context.ts";
+import { agentMentionReminder } from "./mention.ts";
+import type { SubagentType, ThinkingLevel } from "./types.ts";
 
 export interface MentionCloneOptions {
   /** The MAIN session's context — what the spawn is attributed to, and the

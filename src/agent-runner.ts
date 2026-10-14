@@ -17,19 +17,19 @@ import {
   SessionManager,
   SettingsManager,
 } from "@earendil-works/pi-coding-agent";
-import { BUILTIN_TOOL_NAMES, getAgentConfig, getConfig, getMemoryToolNames, getReadOnlyMemoryToolNames, getToolNamesForType } from "./agent-types.js";
-import { runInChildSessionContext } from "./child-context.js";
-import { buildParentContext, extractText } from "./context.js";
-import { DEFAULT_AGENTS } from "./default-agents.js";
-import { detectEnv } from "./env.js";
-import { buildMemoryBlock, buildReadOnlyMemoryBlock } from "./memory.js";
-import { createNestedSubagentTools, getMaxSubagentDepth, type NestedAgentManager } from "./nested-tools.js";
-import { buildAgentPrompt, type PromptExtras } from "./prompts.js";
-import { preloadSkills } from "./skill-loader.js";
-import { createStructuredCapture, createStructuredOutputTool, structuredRetryPrompt } from "./structured-output.js";
-import type { SubagentType, ThinkingLevel } from "./types.js";
-import type { LifetimeUsage } from "./usage.js";
-import type { CompiledSchema } from "./workflow/json-schema.js";
+import { BUILTIN_TOOL_NAMES, getAgentConfig, getConfig, getMemoryToolNames, getReadOnlyMemoryToolNames, getToolNamesForType } from "./agent-types.ts";
+import { runInChildSessionContext } from "./child-context.ts";
+import { buildParentContext, extractText } from "./context.ts";
+import { DEFAULT_AGENTS } from "./default-agents.ts";
+import { detectEnv } from "./env.ts";
+import { buildMemoryBlock, buildReadOnlyMemoryBlock } from "./memory.ts";
+import { createNestedSubagentTools, getMaxSubagentDepth, type NestedAgentManager } from "./nested-tools.ts";
+import { buildAgentPrompt, type PromptExtras } from "./prompts.ts";
+import { preloadSkills } from "./skill-loader.ts";
+import { createStructuredCapture, createStructuredOutputTool, structuredRetryPrompt } from "./structured-output.ts";
+import type { SubagentType, ThinkingLevel } from "./types.ts";
+import type { LifetimeUsage } from "./usage.ts";
+import type { CompiledSchema } from "./workflow/json-schema.ts";
 
 /**
  * Tool names registered by THIS extension. Single source of truth so the

@@ -20,7 +20,7 @@
  * unit-testable without a terminal.
  */
 
-import type { WorkflowMeta, WorkflowPhaseMeta } from "./meta.js";
+import type { WorkflowMeta, WorkflowPhaseMeta } from "./meta.ts";
 
 /** Raw entry lifecycle, as written by the runtime. */
 export type WorkflowEntryState = "start" | "progress" | "done" | "error";

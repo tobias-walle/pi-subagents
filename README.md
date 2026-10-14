@@ -999,6 +999,8 @@ src/
     workflow-dialog.ts    # /agents → Workflows two-pane inspector
 ```
 
+pi loads the extension straight from `src/index.ts`. Relative imports under `src/` name the `.ts` file (`./agent-types.ts`), so pi's loader finds each module without probing for missing `.js` paths. `npm run build` rewrites these specifiers to `.js` in `dist/` (`rewriteRelativeImportExtensions`).
+
 ## License
 
 MIT — [tintinweb](https://github.com/tintinweb)

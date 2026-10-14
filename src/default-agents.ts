@@ -4,7 +4,7 @@
  * These are always available but can be overridden by user .md files with the same name.
  */
 
-import type { AgentConfig } from "./types.js";
+import type { AgentConfig } from "./types.ts";
 
 const READ_ONLY_TOOLS = ["read", "bash", "grep", "find", "ls"];
 

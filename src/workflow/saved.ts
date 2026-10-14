@@ -40,9 +40,9 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { isAbsolute, join } from "node:path";
 import { getAgentDir } from "@earendil-works/pi-coding-agent";
-import { isSymlink, isUnsafeName, safeReadFile } from "../memory.js";
-import { hasMetaDeclaration } from "./meta.js";
-import { MAX_SCRIPT_LENGTH } from "./runtime.js";
+import { isSymlink, isUnsafeName, safeReadFile } from "../memory.ts";
+import { hasMetaDeclaration } from "./meta.ts";
+import { MAX_SCRIPT_LENGTH } from "./runtime.ts";
 
 /** Extension a saved workflow file carries. */
 const WORKFLOW_EXTENSION = ".js";

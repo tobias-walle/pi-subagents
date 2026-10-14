@@ -8,14 +8,14 @@
 import type { TextContent } from "@earendil-works/pi-ai";
 import { type AgentSession, getMarkdownTheme } from "@earendil-works/pi-coding-agent";
 import { type Component, Input, Markdown, type MarkdownOptions, type MarkdownTheme, matchesKey, type TUI, truncateToWidth, visibleWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
-import { renderAgentName } from "../agent-color.js";
-import { extractText } from "../context.js";
-import type { AgentRecord, ViewerMarkdownMode } from "../types.js";
-import { getLifetimeCost, getLifetimeTotal, getSessionContextPercent } from "../usage.js";
-import type { Theme } from "./agent-widget.js";
-import { type AgentActivity, buildInvocationTags, describeActivity, fgPreservingNestedStyles, formatCost, formatDuration, formatSessionTokens, getPromptModeLabel } from "./agent-widget.js";
-import { renderCompactTranscript } from "./compact-transcript.js";
-import { createViewerKeys, type ViewerKeybindings, type ViewerKeys } from "./viewer-keys.js";
+import { renderAgentName } from "../agent-color.ts";
+import { extractText } from "../context.ts";
+import type { AgentRecord, ViewerMarkdownMode } from "../types.ts";
+import { getLifetimeCost, getLifetimeTotal, getSessionContextPercent } from "../usage.ts";
+import type { Theme } from "./agent-widget.ts";
+import { type AgentActivity, buildInvocationTags, describeActivity, fgPreservingNestedStyles, formatCost, formatDuration, formatSessionTokens, getPromptModeLabel } from "./agent-widget.ts";
+import { renderCompactTranscript } from "./compact-transcript.ts";
+import { createViewerKeys, type ViewerKeybindings, type ViewerKeys } from "./viewer-keys.ts";
 
 /** Base lines consumed by chrome: top border + header + header sep + footer sep + footer + bottom border. */
 const CHROME_LINES_BASE = 6;

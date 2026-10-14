@@ -4,7 +4,7 @@
 
 import type { ThinkingLevel } from "@earendil-works/pi-ai";
 import type { AgentSession } from "@earendil-works/pi-coding-agent";
-import type { LifetimeUsage } from "./usage.js";
+import type { LifetimeUsage } from "./usage.ts";
 
 export type { ThinkingLevel };
 

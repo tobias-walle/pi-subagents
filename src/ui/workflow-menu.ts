@@ -15,9 +15,9 @@
  */
 
 import type { ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
-import type { AgentRecord } from "../types.js";
-import { pauseWorkflowTask, resumeWorkflowTask, type WorkflowTask } from "../workflow/task.js";
-import { WorkflowDialog } from "./workflow-dialog.js";
+import type { AgentRecord } from "../types.ts";
+import { pauseWorkflowTask, resumeWorkflowTask, type WorkflowTask } from "../workflow/task.ts";
+import { WorkflowDialog } from "./workflow-dialog.ts";
 
 /** Everything the menu and the inspector need from the extension around them. */
 export interface WorkflowMenuDeps {
@@ -58,7 +58,7 @@ export async function showWorkflowDialog(
   // reached the same way: both are rows of the fleet list, and opening one
   // must not behave unlike opening the other. Inline, the frame would render
   // into the conversation and stay in the scrollback after it closed.
-  const { VIEWPORT_HEIGHT_PCT } = await import("./conversation-viewer.js");
+  const { VIEWPORT_HEIGHT_PCT } = await import("./conversation-viewer.ts");
   /**
    * This dialog's own overlay, so `c` can hide it while the conversation is
    * up. Overlays stack, so the viewer would render *over* it either way —

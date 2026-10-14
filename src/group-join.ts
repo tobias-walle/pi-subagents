@@ -6,7 +6,7 @@
  * then a single consolidated notification is sent.
  */
 
-import type { AgentRecord } from "./types.js";
+import type { AgentRecord } from "./types.ts";
 
 export type DeliveryCallback = (records: AgentRecord[], partial: boolean) => void;
 

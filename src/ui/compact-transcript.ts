@@ -1,8 +1,8 @@
 import type { TextContent } from "@earendil-works/pi-ai";
 import type { AgentSession } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, wrapTextWithAnsi } from "@earendil-works/pi-tui";
-import { extractText } from "../context.js";
-import type { Theme } from "./agent-widget.js";
+import { extractText } from "../context.ts";
+import type { Theme } from "./agent-widget.ts";
 
 type TranscriptMessage = AgentSession["messages"][number];
 

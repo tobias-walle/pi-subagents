@@ -39,7 +39,7 @@
  * and the `setActiveTools` — see `resolveWorkflowCollisions` in index.ts.
  */
 
-import { SUBAGENT_TOOL_NAMES } from "../agent-runner.js";
+import { SUBAGENT_TOOL_NAMES } from "../agent-runner.ts";
 
 /**
  * Tool names that mean "another extension already orchestrates subagents".

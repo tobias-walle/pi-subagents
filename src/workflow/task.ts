@@ -15,11 +15,11 @@
  */
 
 import { randomUUID } from "node:crypto";
-import { escapeXml } from "../xml.js";
-import type { WorkflowJournalEntry } from "./journal.js";
-import type { WorkflowMeta } from "./meta.js";
-import { collapse, elapsedMs, stats, type WorkflowEntry, type WorkflowRunStatus } from "./progress.js";
-import type { WorkflowControl, WorkflowRunResult } from "./runtime.js";
+import { escapeXml } from "../xml.ts";
+import type { WorkflowJournalEntry } from "./journal.ts";
+import type { WorkflowMeta } from "./meta.ts";
+import { collapse, elapsedMs, stats, type WorkflowEntry, type WorkflowRunStatus } from "./progress.ts";
+import type { WorkflowControl, WorkflowRunResult } from "./runtime.ts";
 
 /** `wf_` + hex, matching Claude Code's `^wf_[a-z0-9-]{6,}$` run ids. */
 export function workflowRunId(): string {

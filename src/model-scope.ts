@@ -7,7 +7,7 @@
  * `disableDefaults` lives in agent-types.ts: both entry points need it.
  */
 
-import { isModelInScope, type ModelRegistryRef, readEnabledModels, resolveEnabledModels } from "./enabled-models.js";
+import { isModelInScope, type ModelRegistryRef, readEnabledModels, resolveEnabledModels } from "./enabled-models.ts";
 
 /**
  * When enabled, subagent model choices are validated against `enabledModels`

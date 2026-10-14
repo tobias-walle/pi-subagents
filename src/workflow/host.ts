@@ -34,14 +34,14 @@
 
 import { existsSync } from "node:fs";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import type { AgentManager } from "../agent-manager.js";
-import { getAgentConfig, resolveSpawnType } from "../agent-types.js";
-import { resolveModel } from "../model-resolver.js";
-import { checkModelScope } from "../model-scope.js";
-import type { AgentRecord, ThinkingLevel } from "../types.js";
-import { getLifetimeTotal } from "../usage.js";
-import type { WorkflowGateResult, WorkflowHost, WorkflowSpawnResult } from "./runtime.js";
-import { resolveWorkflowSource } from "./saved.js";
+import type { AgentManager } from "../agent-manager.ts";
+import { getAgentConfig, resolveSpawnType } from "../agent-types.ts";
+import { resolveModel } from "../model-resolver.ts";
+import { checkModelScope } from "../model-scope.ts";
+import type { AgentRecord, ThinkingLevel } from "../types.ts";
+import { getLifetimeTotal } from "../usage.ts";
+import type { WorkflowGateResult, WorkflowHost, WorkflowSpawnResult } from "./runtime.ts";
+import { resolveWorkflowSource } from "./saved.ts";
 
 /**
  * Wall-clock bound on a `gate` command. Generous — a gate is routinely a test

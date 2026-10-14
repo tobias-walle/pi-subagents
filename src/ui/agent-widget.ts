@@ -6,11 +6,11 @@
  */
 
 import { truncateToWidth } from "@earendil-works/pi-tui";
-import { renderAgentName } from "../agent-color.js";
-import { type AgentManager, isTopLevelAgent } from "../agent-manager.js";
-import { getConfig } from "../agent-types.js";
-import type { AgentInvocation, SubagentType, WidgetMode } from "../types.js";
-import { getLifetimeCost, getLifetimeTotal, getSessionContextPercent, type LifetimeUsage, type SessionLike } from "../usage.js";
+import { renderAgentName } from "../agent-color.ts";
+import { type AgentManager, isTopLevelAgent } from "../agent-manager.ts";
+import { getConfig } from "../agent-types.ts";
+import type { AgentInvocation, SubagentType, WidgetMode } from "../types.ts";
+import { getLifetimeCost, getLifetimeTotal, getSessionContextPercent, type LifetimeUsage, type SessionLike } from "../usage.ts";
 
 // ---- Constants ----
 

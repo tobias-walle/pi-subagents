@@ -1,5 +1,5 @@
 import { Type } from "@sinclair/typebox";
-import type { AgentConfig, IsolationMode, JoinMode, ThinkingLevel } from "./types.js";
+import type { AgentConfig, IsolationMode, JoinMode, ThinkingLevel } from "./types.ts";
 
 /**
  * The model-facing `isolation` parameter, shared by the `Agent` tool and the

@@ -43,9 +43,9 @@
  */
 
 import type { AutocompleteItem, AutocompleteProvider, AutocompleteSuggestions } from "@earendil-works/pi-tui";
-import type { AgentManager } from "../agent-manager.js";
-import { handleBase, MENTION_TRIGGER } from "../mention.js";
-import type { AgentRecord, AgentTombstone } from "../types.js";
+import type { AgentManager } from "../agent-manager.ts";
+import { handleBase, MENTION_TRIGGER } from "../mention.ts";
+import type { AgentRecord, AgentTombstone } from "../types.ts";
 
 /**
  * One thing `@` can address, and what sending to it will do. `typeLabel` is the

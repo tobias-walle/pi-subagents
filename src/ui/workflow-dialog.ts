@@ -49,7 +49,7 @@ import {
   visibleWidth,
   wrapTextWithAnsi,
 } from "@earendil-works/pi-tui";
-import type { WorkflowMeta } from "../workflow/meta.js";
+import type { WorkflowMeta } from "../workflow/meta.ts";
 import {
   buildPhaseGroups,
   displayState,
@@ -60,8 +60,8 @@ import {
   type WorkflowAgentEntry,
   type WorkflowDisplayState,
   type WorkflowEntry,
-} from "../workflow/progress.js";
-import { SPINNER, type Theme } from "./agent-widget.js";
+} from "../workflow/progress.ts";
+import { SPINNER, type Theme } from "./agent-widget.ts";
 import {
   ASCII_GLYPHS,
   clampLine,
@@ -75,7 +75,7 @@ import {
   type WorkflowCardLine,
   type WorkflowCardSegment,
   type WorkflowCardTask,
-} from "./workflow-card.js";
+} from "./workflow-card.ts";
 
 /** Fallback width when the caller does not know the terminal's. */
 const DEFAULT_WIDTH = 80;

@@ -7,7 +7,7 @@
  * Agents uses, so those definitions render as written.
  */
 
-import { getConfig } from "./agent-types.js";
+import { getConfig } from "./agent-types.ts";
 
 const NAMED_AGENT_COLORS: Readonly<Record<string, string>> = {
   // Claude Code's eight subagent colors, as its default theme renders them.
